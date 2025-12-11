@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>避難袋チェック診断 🎒</title>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    background-color: #FFF8E7;
+    margin: 0;
+    padding: 20px;
+}
+h1, h2 { text-align: center; }
+
+/* 質問カード */
+.question-card {
+    background-color: white;
+    padding: 1.4rem 1.6rem;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1.3rem;
+}
+
+/* ボタン */
+button {
+    padding: 12px 24px;
+    border-radius: 999px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 45%;
+}
+.yes-btn { background-color: #FF6B6B; color: white; }
+.no-btn  { background-color: #4CAF50; color: white; }
+.nav-btn { background-color: #EEEEEE; color: #333; border: 1px solid #CCC; }
+
+.btn-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.section {
+    max-width: 500px;
+    margin: auto;
+}
+
+.correct { color: #2E8B57; font-weight: bold; }
+.wrong { color: #D9534F; font-weight: bold; }
+</style>
+</head>
+
+<body>
+<div id="app" class="section"></div>
+
+<script>
+/* =======================================
+   質問データ
+   type: must → 必須（各10点）
+         bonus → 任意（各3.3点）
+======================================= */
+const QUESTIONS = [
+    {id: 1, text: "飲料水を準備していますか？", type: "must",
+     desc: "1人1日1L以上、3日分が目安です。"},
+    {id: 2, text: "常備薬を入れていますか？", type: "must",
+     desc: "普段使用している薬がないと困ります。"},
+    {id: 3, text: "食料品（賞味期限内）を入れていますか？", type: "must",
+     desc: "最低3日分の非常食を用意しましょう。"},
+    {id: 4, text: "ライトを入れていますか？", type: "must",
+     desc: "停電時の行動に必須です。"},
+    {id: 5, text: "現金を入れていますか？", type: "must",
+     desc: "停電時は電子決済が使えません。"},
+    {id: 6, text: "衛生用品（マスク・ウェットティッシュ）を入れていますか？", type: "must",
+     desc: "避難所では衛生状態が悪化しやすいです。"},
+    {id: 7, text: "タオルまたはアルミシートを入れていますか？", type: "must",
+     desc: "防寒・体温保持に重要です。"},
+    {id: 8, text: "衣類（下着、防寒着）を入れていますか？", type: "must",
+     desc: "避難所は気温が低くなりがちです。"},
+    {id: 9, text: "医療関係書類（マイナンバーカード・お薬手帳）を入れていますか？", type: "must",
+     desc: "本人確認や医療受診に必要です。"},
+    {id: 10, text: "簡易トイレを準備していますか？", type: "must",
+     desc: "断水時の問題に直結します。"},
+
+    // 任意（＋最大20％）
+    {id: 11, text: "季節用品（カイロ・日焼け止めなど）を入れていますか？", type: "bonus",
+     desc: "あると快適に過ごせます。"},
+    {id: 12, text: "ヘルメット・軍手・ヘッドランプを準備していますか？", type: "bonus",
+     desc: "避難時やがれき撤去に役立ちます。"},
+    {id: 13, text: "ビニール袋を入れていますか？", type: "bonus",
+     desc: "ごみ袋・防水・収納など万能アイテムです。"},
+    {id: 14, text: "笛を準備していますか？", type: "bonus",
+     desc: "閉じ込められた時に助けを呼べます。"},
+    {id: 15, text: "モバイルバッテリーを入れていますか？", type: "bonus",
+     desc: "スマホで情報収集・連絡ができます。"},
+    {id: 16, text: "安眠用品（耳栓・アイマスク）を準備していますか？", type: "bonus",
+     desc: "避難所では睡眠の質が下がりやすいです。"}
+];
+
+let page = "home";
+let i = 0;
+
+let mustScore = 0;
+let bonusScore = 0;
+let wrongList = [];
+
+/* =======================================
+   画面描画
+======================================= */
+function render() {
+    const app = document.getElementById("app");
+
+    if (page === "home") {
+        app.innerHTML = `
+            <h1>避難袋チェック診断 🎒</h1>
+            <p>あなたの避難袋はどれくらい充実していますか？</p>
+            <div style="text-align:center;">
+                <button class="nav-btn" onclick="startQuiz()">診断を開始する ▶</button>
+            </div>
+        `;
+    }
+
+    else if (page === "quiz") {
+        const q = QUESTIONS[i];
+        app.innerHTML = `
+            <h2>質問 ${i+1} / 全 ${QUESTIONS.length}</h2>
+            <div class="question-card">
+                <div style="font-size:1.1rem;">${q.text}</div>
+            </div>
+
+            <div class="btn-row">
+                <button class="yes-btn" onclick="choose(true)">はい</button>
+                <button class="no-btn" onclick="choose(false)">いいえ</button>
+            </div>
+
+            <div class="btn-row">
+                <button class="nav-btn" onclick="prev()" ${i===0 ? "disabled" : ""}>前へ</button>
+                <button class="nav-btn" onclick="goHome()">トップへ戻る</button>
+            </div>
+        `;
+    }
+
+    else if (page === "result") {
+        const base = mustScore;                  // 0〜100
+        const bonus = Math.min(bonusScore, 20);  // 最大20％
+        const total = Math.min(base + bonus, 120); // 上限120％
+
+        let wrongHtml = "";
+        wrongList.forEach(item => {
+            wrongHtml += `
+                <div class="question-card">
+                    <div class="wrong">✖ ${item.text}</div>
+                    <p>${item.desc}</p>
+                </div>
+            `;
+        });
+
+        app.innerHTML = `
+            <h1>診断結果</h1>
+            <h2>避難袋の充実度：${total.toFixed(1)}%</h2>
+
+            <p>必須アイテム：${base}%</p>
+            <p>追加アイテム：+${bonus.toFixed(1)}%</p>
+
+            <h3>不足しているもの</h3>
+            ${wrongHtml || "<p class='correct'>全項目準備できています！素晴らしい避難袋です！</p>"}
+
+            <div style="text-align:center; margin-top:20px;">
+                <button class="nav-btn" onclick="goHome()">もう一度診断する</button>
+            </div>
+        `;
+    }
+}
+
+/* =======================================
+   質問開始
+======================================= */
+function startQuiz() {
+    page = "quiz";
+    i = 0;
+    mustScore = 0;
+    bonusScore = 0;
+    wrongList = [];
+    render();
+}
+
+/* =======================================
+   回答処理
+======================================= */
+function choose(answer) {
+    const q = QUESTIONS[i];
+
+    if (answer) {
+        if (q.type === "must") mustScore += 10;
+        else if (q.type === "bonus") bonusScore += 3.3;
+    } else {
+        wrongList.push(q);
+    }
+
+    if (i === QUESTIONS.length - 1) {
+        page = "result";
+    } else {
+        i++;
+    }
+    render();
+}
+
+/* =======================================
+   前へ
+======================================= */
+function prev() {
+    if (i > 0) i--;
+    render();
+}
+
+/* =======================================
+   ホームへ
+======================================= */
+function goHome() {
+    page = "home";
+    render();
+}
+
+render();
+</script>
+
+</body>
+</html>
