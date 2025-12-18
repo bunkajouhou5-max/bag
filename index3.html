@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>避難袋チェック診断 🎒</title>
+<title>避難袋充実させちゃう❤️</title>
 
 <style>
 body {
@@ -85,18 +85,18 @@ const QUESTIONS = [
      desc: "断水時の問題に直結します。"},
 
     // 任意（＋最大20％）
-    {id: 11, text: "季節用品（カイロ・日焼け止めなど）を入れていますか？", type: "bonus",
-     desc: "あると快適に過ごせます。"},
-    {id: 12, text: "ヘルメット・軍手・ヘッドランプを準備していますか？", type: "bonus",
-     desc: "避難時やがれき撤去に役立ちます。"},
-    {id: 13, text: "ビニール袋を入れていますか？", type: "bonus",
-     desc: "ごみ袋・防水・収納など万能アイテムです。"},
-    {id: 14, text: "笛を準備していますか？", type: "bonus",
-     desc: "閉じ込められた時に助けを呼べます。"},
-    {id: 15, text: "モバイルバッテリーを入れていますか？", type: "bonus",
-     desc: "スマホで情報収集・連絡ができます。"},
-    {id: 16, text: "安眠用品（耳栓・アイマスク）を準備していますか？", type: "bonus",
-     desc: "避難所では睡眠の質が下がりやすいです。"}
+    {id: 11, text: "季節用品（カイロ・日焼け止めなど）入れてる？", type: "bonus",
+     desc: "あったら快適に過ごせるよ"},
+    {id: 12, text: "ヘルメット・軍手・ヘッドランプは準備してる？", type: "bonus",
+     desc: "避難時やがれき撤去に役立つ！"},
+    {id: 13, text: "ビニール袋を入れてる？", type: "bonus",
+     desc: "ごみ袋・防水・収納などに使える万能アイテム！！。"},
+    {id: 14, text: "笛は準備してる？", type: "bonus",
+     desc: "助けを呼ぶときに役立つかも！"},
+    {id: 15, text: "モバイルバッテリーは入れてる？", type: "bonus",
+     desc: "スマホで情報収集・連絡ができる"},
+    {id: 16, text: "安眠用品（耳栓・アイマスク）を準備してる？", type: "bonus",
+     desc: "避難所では睡眠の質が下がりやすい😭"}
 ];
 
 let page = "home";
@@ -114,10 +114,10 @@ function render() {
 
     if (page === "home") {
         app.innerHTML = `
-            <h1>避難袋チェック診断 🎒</h1>
-            <p>あなたの避難袋はどれくらい充実していますか？</p>
+            <h1>避難袋充実させちゃう❤️</h1>
+            <p>あなたの避難袋はどれくらい充実してるかな？</p>
             <div style="text-align:center;">
-                <button class="nav-btn" onclick="startQuiz()">診断を開始する ▶</button>
+                <button class="nav-btn" onclick="startQuiz()">診断開始！！ ▶</button>
             </div>
         `;
     }
@@ -165,7 +165,7 @@ function render() {
             <p>追加アイテム：+${bonus.toFixed(1)}%</p>
 
             <h3>不足しているもの</h3>
-            ${wrongHtml || "<p class='correct'>全項目準備できています！素晴らしい避難袋です！</p>"}
+            ${wrongHtml || "<p class='correct'>全項目準備できています！素晴らしい避難袋！</p>"}
 
             <div style="text-align:center; margin-top:20px;">
                 <button class="nav-btn" onclick="goHome()">もう一度診断する</button>
