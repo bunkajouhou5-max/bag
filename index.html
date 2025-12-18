@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>避難袋準備してる？？</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+body {
+    font-family: 'Pacifico', cursive;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #ffe6f0, #d0c4ff, #b0f0ff);
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
+}
+
+h1, h2, h3 { text-align: center; color: #d63384; text-shadow: 0 0 8px #fff; }
+
+/* 星アニメ */
+.star {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: fall linear infinite;
+}
+@keyframes fall {
+    0% { transform: translateY(-10px) translateX(0) scale(0.5); opacity:0;}
+    50% { opacity:1;}
+    100% { transform: translateY(100vh) translateX(50px) scale(1); opacity:0;}
+}
+
+/* カード */
+.question-card {
+    background: rgba(255,255,255,0.7);
+    border-radius: 2rem;
+    box-shadow: 0 8px 20px rgba(255,182,193,0.5);
+    padding: 1.6rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    transition: transform 0.2s;
+}
+.question-card:hover { transform: translateY(-5px); }
+
+/* ボタン */
+button {
+    padding: 12px 24px;
+    border-radius: 999px;
+    border: none;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 45%;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+button:hover { transform: scale(1.05); box-shadow: 0 0 12px #fff; }
+
+.yes-btn { background: linear-gradient(45deg, #ffb6c1, #ff69b4); color: white; }
+.no-btn  { background: linear-gradient(45deg, #ff69b4, #ff1493); color: white; }
+.nav-btn { background: #fff0f8; color: #d63384; border: 2px solid #ff69b4; font-weight:bold; }
+
+.btn-row { display:flex; justify-content:space-between; margin-bottom:20px; }
+.section { max-width:500px; margin:auto; }
+
+.correct { color: #d63384; font-weight:bold; }
+.wrong { color: #c71585; font-weight:bold; }
+
+.result-category { text-align:center; color:white; text-shadow:0 0 6px #ff69b4; background: linear-gradient(90deg,#ffb6c1,#ff69b4,#ffb6c1); border-radius:1rem; padding:0.5rem; margin:1rem 0; }
+</style>
+</head>
+<body>
+<div id="app" class="section"></div>
+
+<script>
+/* =======================================
+   星アニメ生成
+======================================= */
+for(let s=0; s<30; s++){
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random()*100 + 'vw';
+    star.style.animationDuration = (Math.random()*5+5)+'s';
+    star.style.width = star.style.height = (Math.random()*5+5)+'px';
+    document.body.appendChild(star);
+}
+
+/* =======================================
+   質問データ
+======================================= */
+const QUESTIONS = [
+  {id:1, text:"飲料水を準備していますか？", type:"must", category:"once", desc:"1人1日1L以上、最低1日分"},
+  {id:2, text:"常備薬を入れていますか？", type:"must", category:"once", desc:"アレルギー薬・風邪薬・絆創膏など"},
+  {id:3, text:"ライト・懐中電灯を入れていますか？", type:"must", category:"once", desc:"停電時に必須"},
+  {id:4, text:"現金・身分証を入れていますか？", type:"must", category:"once", desc:"停電時は電子決済が使えない"},
+  {id:5, text:"下着・防寒着1セットを入れていますか？", type:"must", category:"once", desc:"最低限の衣類"},
+  {id:6, text:"携帯ラジオ・スマホ充電器を入れていますか？", type:"bonus", category:"once", desc:"情報収集用"},
+
+  {id:7, text:"飲料水を追加で準備していますか？", type:"must", category:"twice", desc:"3日分目安"},
+  {id:8, text:"非常食（賞味期限内）を入れていますか？", type:"must", category:"twice", desc:"3日分目安"},
+  {id:9, text:"タオル・アルミシートを入れていますか？", type:"must", category:"twice", desc:"防寒・体温保持に重要"},
+  {id:10, text:"衛生用品（マスク・ウェットティッシュ・簡易トイレ）を入れていますか？", type:"must", category:"twice", desc:"避難所の衛生対策"},
+  {id:11, text:"ヘルメット・軍手を準備していますか？", type:"bonus", category:"twice", desc:"避難や瓦礫撤去に役立つ"},
+  {id:12, text:"安眠用品（耳栓・アイマスク）を準備していますか？", type:"bonus", category:"twice", desc:"避難所の睡眠対策"},
+  {id:13, text:"ビニール袋を入れていますか？", type:"bonus", category:"twice", desc:"ごみ袋・防水・荷物整理用"},
+  {id:14, text:"笛を準備していますか？", type:"bonus", category:"twice", desc:"助けを呼ぶときに役立つ"},
+
+  {id:15, text:"食料（長期保存可能）を備蓄していますか？", type:"must", category:"stock", desc:"1週間分以上目安"},
+  {id:16, text:"飲料水を備蓄していますか？", type:"must", category:"stock", desc:"1週間分目安"},
+  {id:17, text:"追加衣類・防寒着を備蓄していますか？", type:"must", category:"stock", desc:"季節に応じて"},
+  {id:18, text:"季節用品（カイロ・日焼け止め・扇子）を備蓄していますか？", type:"bonus", category:"stock", desc:"快適さ向上"},
+  {id:19, text:"多目的道具（ナイフ・ロープ・ガムテープなど）を備蓄していますか？", type:"bonus", category:"stock", desc:"緊急時に便利"},
+  {id:20, text:"モバイルバッテリーを備蓄していますか？", type:"bonus", category:"stock", desc:"予備として保管"}
+];
+
+let page="home", i=0, mustScore=0, bonusScore=0, wrongList=[];
+
+/* =======================================
+   描画関数
+======================================= */
+function render(){
+  const app = document.getElementById("app");
+  if(page==="home"){
+    app.innerHTML=`
+      <h1>ゆめかわ避難袋診断🌈💖</h1>
+      <p style="text-align:center;">あなたの避難袋、どれくらい夢かわプリンセス級に完璧かな？✨</p>
+      <div style="text-align:center;">
+        <button class="nav-btn" onclick="startQuiz()">診断スタート💖▶</button>
+      </div>
+    `;
+  } else if(page==="quiz"){
+    const q=QUESTIONS[i];
+    app.innerHTML=`
+      <h2>質問 ${i+1} / ${QUESTIONS.length}</h2>
+      <div class="question-card">${q.text}</div>
+      <div class="btn-row">
+        <button class="yes-btn" onclick="choose(true)">はい💖</button>
+        <button class="no-btn" onclick="choose(false)">いいえ💔</button>
+      </div>
+      <div class="btn-row">
+        <button class="nav-btn" onclick="prev()" ${i===0?"disabled":""}>前へ</button>
+        <button class="nav-btn" onclick="goHome()">トップへ戻る</button>
+      </div>
+    `;
+  } else if(page==="result"){
+    const base=mustScore;
+    const bonus=Math.min(bonusScore,20);
+    const total=Math.min(base+bonus,120);
+    const onceList=wrongList.filter(q=>q.category==="once");
+    const twiceList=wrongList.filter(q=>q.category==="twice");
+    const stockList=wrongList.filter(q=>q.category==="stock");
+    function renderList(list){ 
+      if(list.length===0) return "<p class='correct'>完璧です！✨💖</p>";
+      return list.map(q=>`<div class="question-card wrong">✖ ${q.text}<p>${q.desc}</p></div>`).join("");
+    }
+    app.innerHTML=`
+      <h1>診断結果🌈💖</h1>
+      <h2>避難袋の充実度：${total.toFixed(1)}%</h2>
+      <p>必須アイテム：${base}%</p>
+      <p>追加アイテム：+${bonus.toFixed(1)}%</p>
+
+      <div class="result-category">一次持ち出し袋</div>
+      ${renderList(onceList)}
+
+      <div class="result-category">二次持ち出し袋</div>
+      ${renderList(twiceList)}
+
+      <div class="result-category">自宅ストック</div>
+      ${renderList(stockList)}
+
+      <div style="text-align:center; margin-top:20px;">
+        <button class="nav-btn" onclick="goHome()">もう一度診断💖</button>
+      </div>
+    `;
+  }
+}
+
+/* =======================================
+   イベント関数
+======================================= */
+function startQuiz(){ page="quiz"; i=0; mustScore=0; bonusScore=0; wrongList=[]; render(); }
+function choose(answer){
+  const q=QUESTIONS[i];
+  if(answer){ if(q.type==="must") mustScore+=10; else if(q.type==="bonus") bonusScore+=3.3; }
+  else{ wrongList.push(q); }
+  if(i===QUESTIONS.length-1) page="result"; else i++;
+  render();
+}
+function prev(){ if(i>0) i--; render(); }
+function goHome(){ page="home"; render(); }
+
+/* 初期表示 */
+render();
+</script>
+</body>
+</html>
+
