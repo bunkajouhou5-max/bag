@@ -3,199 +3,289 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>避難袋準備してる？？</title>
+<title>避難袋チェックシート</title>
+
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+/* ===============================
+   ベース
+=============================== */
+html, body {
+  margin: 0;
+  padding: 0;
+}
 
 body {
-    font-family: 'Pacifico', cursive;
-    margin: 0;
-    padding: 20px;
-    background: linear-gradient(135deg, #ffe6f0, #d0c4ff, #b0f0ff);
-    overflow-x: hidden;
-    position: relative;
-    min-height: 100vh;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  background: linear-gradient(180deg,#e0f7fa 0%,#ffffff 100%);
+  background-attachment: fixed;
+  padding: 20px;
+  overflow-x: hidden;
 }
 
-h1, h2, h3 { text-align: center; color: #d63384; text-shadow: 0 0 8px #fff; }
-
-/* 星アニメ */
-.star {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: white;
-    border-radius: 50%;
-    opacity: 0.8;
-    animation: fall linear infinite;
-}
-@keyframes fall {
-    0% { transform: translateY(-10px) translateX(0) scale(0.5); opacity:0;}
-    50% { opacity:1;}
-    100% { transform: translateY(100vh) translateX(50px) scale(1); opacity:0;}
+/* ===============================
+   背景アイテム（等間隔）
+=============================== */
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-auto-rows: 120px;
+  place-items: center;
+  z-index: 0;
+  pointer-events: none;
 }
 
-/* カード */
+.bg-item {
+  font-size: 2.6rem;
+  opacity: 0.25;
+  filter: grayscale(100%);
+}
+
+@media (max-width:600px){
+  .bg-layer {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-auto-rows: 100px;
+  }
+  .bg-item {
+    font-size: 2.1rem;
+    opacity: 0.15;
+  }
+}
+
+@media print {
+  .bg-layer { display: none; }
+  body { background: #fff; }
+}
+
+/* ===============================
+   メインUI
+=============================== */
+#app {
+  max-width: 520px;
+  margin: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* 見出し */
+h1, h2 {
+  text-align: center;
+  color: #333;
+}
+
+/* ===============================
+   文字背景
+=============================== */
+.text-box {
+  background: rgba(255,255,255,0.92);
+  border-radius: 1rem;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* ===============================
+   質問カード
+=============================== */
 .question-card {
-    background: rgba(255,255,255,0.7);
-    border-radius: 2rem;
-    box-shadow: 0 8px 20px rgba(255,182,193,0.5);
-    padding: 1.6rem;
-    margin-bottom: 1.5rem;
-    position: relative;
-    transition: transform 0.2s;
+  background: rgba(255,255,255,0.96);
+  border-left: 6px solid #ffb74d;
+  border-radius: 1rem;
+  padding: 1.2rem 1.4rem;
 }
-.question-card:hover { transform: translateY(-5px); }
 
-/* ボタン */
+/* ===============================
+   ボタン
+=============================== */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
 button {
-    padding: 12px 24px;
-    border-radius: 999px;
-    border: none;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    width: 45%;
-    transition: transform 0.2s, box-shadow 0.2s;
+  flex: 1;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
 }
-button:hover { transform: scale(1.05); box-shadow: 0 0 12px #fff; }
 
-.yes-btn { background: linear-gradient(45deg, #ffb6c1, #ff69b4); color: white; }
-.no-btn  { background: linear-gradient(45deg, #ff69b4, #ff1493); color: white; }
-.nav-btn { background: #fff0f8; color: #d63384; border: 2px solid #ff69b4; font-weight:bold; }
+.yes-btn {
+  background: #4fc3f7;
+  color: #fff;
+}
 
-.btn-row { display:flex; justify-content:space-between; margin-bottom:20px; }
-.section { max-width:500px; margin:auto; }
+.no-btn {
+  background: #ff6f91;
+  color: #fff;
+}
 
-.correct { color: #d63384; font-weight:bold; }
-.wrong { color: #c71585; font-weight:bold; }
+.nav-btn {
+  background: #ffffff;
+  color: #333;
+  border: 2px solid #4fc3f7;
+}
 
-.result-category { text-align:center; color:white; text-shadow:0 0 6px #ff69b4; background: linear-gradient(90deg,#ffb6c1,#ff69b4,#ffb6c1); border-radius:1rem; padding:0.5rem; margin:1rem 0; }
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 </style>
 </head>
+
 <body>
-<div id="app" class="section"></div>
+
+<div class="bg-layer" id="bgLayer"></div>
+<div id="app"></div>
 
 <script>
-/* =======================================
-   星アニメ生成
-======================================= */
-for(let s=0; s<30; s++){
-    const star = document.createElement('div');
-    star.className = 'star';
-    star.style.left = Math.random()*100 + 'vw';
-    star.style.animationDuration = (Math.random()*5+5)+'s';
-    star.style.width = star.style.height = (Math.random()*5+5)+'px';
-    document.body.appendChild(star);
+/* ===============================
+   背景アイテム生成
+=============================== */
+const bgIcons = ["💧","🥫","🔦","🩹","📻","🔋","🪫","📱","🧤","🧦","🧣","🧻","🧴","🪪","🥪","🧯","🍼","🍫","💊","👛","🎒","💧","🥫","🔦","🩹","📻","🔋","🪫","📱","🧤","🧦","🧣","🧻","🧴","🪪","🥪","🧯","🍼","🍫","💊"];
+const bgLayer = document.getElementById("bgLayer");
+function renderBg(){
+  bgLayer.innerHTML = "";
+  bgIcons.forEach(icon=>{
+    const el = document.createElement("div");
+    el.className = "bg-item";
+    el.textContent = icon;
+    bgLayer.appendChild(el);
+  });
 }
+renderBg();
 
-/* =======================================
+/* ===============================
    質問データ
-======================================= */
+=============================== */
 const QUESTIONS = [
-  {id:1, text:"飲料水を準備していますか？", type:"must", category:"once", desc:"1人1日1L以上、最低1日分"},
-  {id:2, text:"常備薬を入れていますか？", type:"must", category:"once", desc:"アレルギー薬・風邪薬・絆創膏など"},
-  {id:3, text:"ライト・懐中電灯を入れていますか？", type:"must", category:"once", desc:"停電時に必須"},
-  {id:4, text:"現金・身分証を入れていますか？", type:"must", category:"once", desc:"停電時は電子決済が使えない"},
-  {id:5, text:"下着・防寒着1セットを入れていますか？", type:"must", category:"once", desc:"最低限の衣類"},
-  {id:6, text:"携帯ラジオ・スマホ充電器を入れていますか？", type:"bonus", category:"once", desc:"情報収集用"},
-
-  {id:7, text:"飲料水を追加で準備していますか？", type:"must", category:"twice", desc:"3日分目安"},
-  {id:8, text:"非常食（賞味期限内）を入れていますか？", type:"must", category:"twice", desc:"3日分目安"},
-  {id:9, text:"タオル・アルミシートを入れていますか？", type:"must", category:"twice", desc:"防寒・体温保持に重要"},
-  {id:10, text:"衛生用品（マスク・ウェットティッシュ・簡易トイレ）を入れていますか？", type:"must", category:"twice", desc:"避難所の衛生対策"},
-  {id:11, text:"ヘルメット・軍手を準備していますか？", type:"bonus", category:"twice", desc:"避難や瓦礫撤去に役立つ"},
-  {id:12, text:"安眠用品（耳栓・アイマスク）を準備していますか？", type:"bonus", category:"twice", desc:"避難所の睡眠対策"},
-  {id:13, text:"ビニール袋を入れていますか？", type:"bonus", category:"twice", desc:"ごみ袋・防水・荷物整理用"},
-  {id:14, text:"笛を準備していますか？", type:"bonus", category:"twice", desc:"助けを呼ぶときに役立つ"},
-
-  {id:15, text:"食料（長期保存可能）を備蓄していますか？", type:"must", category:"stock", desc:"1週間分以上目安"},
-  {id:16, text:"飲料水を備蓄していますか？", type:"must", category:"stock", desc:"1週間分目安"},
-  {id:17, text:"追加衣類・防寒着を備蓄していますか？", type:"must", category:"stock", desc:"季節に応じて"},
-  {id:18, text:"季節用品（カイロ・日焼け止め・扇子）を備蓄していますか？", type:"bonus", category:"stock", desc:"快適さ向上"},
-  {id:19, text:"多目的道具（ナイフ・ロープ・ガムテープなど）を備蓄していますか？", type:"bonus", category:"stock", desc:"緊急時に便利"},
-  {id:20, text:"モバイルバッテリーを備蓄していますか？", type:"bonus", category:"stock", desc:"予備として保管"}
+  {id:1,text:"飲料水を準備していますか？",desc:"1人1日3L × 3日分", url:"https://www.amazon.co.jp/dp/B07RWWZT8J"},
+  {id:2,text:"常備薬・救急用品を入れていますか？",desc:"持病薬・絆創膏など", url:"https://www.amazon.co.jp/dp/B010D0CI06"},
+  {id:3,text:"懐中電灯を入れていますか？",desc:"停電対策", url:"https://www.amazon.co.jp/dp/B005FEGYCO"},
+  {id:4,text:"現金や身分証を入れていますか？",desc:"電子決済不可対策"},
+  {id:5,text:"下着や防寒着を準備していますか？",desc:"最低1セット"},
+  {id:6,text:"非常食を準備していますか？",desc:"最低3日分", url:"https://www.amazon.co.jp/dp/B091DSJY5K"},
+  {id:7,text:"衛生用品を準備していますか？",desc:"マスク・簡易トイレ", url:"},
+  {id:8,text:"充電器やモバイルバッテリーはありますか？",desc:"情報確保用"},
+  {id:9,text:"笛や連絡手段を準備していますか？",desc:"救助要請用"},
+  {id:10,text:"自宅に備蓄がありますか？",desc:"1週間分以上"},
+  {id:11,text:"ライト・懐中電灯を追加で準備していますか？",desc:"予備として"},
+  {id:12,text:"追加の飲料水を備蓄していますか？",desc:"3日分以上"},
+  {id:13,text:"追加の非常食を備蓄していますか？",desc:"3日分以上"},
+  {id:14,text:"タオル・アルミシートを準備していますか？",desc:"防寒・体温保持用"},
+  {id:15,text:"ヘルメット・軍手を準備していますか？",desc:"避難や瓦礫撤去用"},
+  {id:16,text:"安眠用品（耳栓・アイマスク）を準備していますか？",desc:"避難所の睡眠対策"},
+  {id:17,text:"ビニール袋を準備していますか？",desc:"ごみ袋・防水・荷物整理用"},
+  {id:18,text:"食料（長期保存可能）を備蓄していますか？",desc:"1週間分以上"},
+  {id:19,text:"追加衣類・防寒着を備蓄していますか？",desc:"季節に応じて"},
+  {id:20,text:"多目的道具（ナイフ・ロープ・ガムテープなど）を備蓄していますか？",desc:"緊急時に便利"}
 ];
 
-let page="home", i=0, mustScore=0, bonusScore=0, wrongList=[];
+/* ===============================
+   状態管理
+=============================== */
+let page = "home";
+let index = 0;
+let answers = {};
 
-/* =======================================
-   描画関数
-======================================= */
+/* ===============================
+   描画
+=============================== */
 function render(){
   const app = document.getElementById("app");
+
   if(page==="home"){
     app.innerHTML=`
-      <h1>ゆめかわ避難袋診断🌈💖</h1>
-      <p style="text-align:center;">あなたの避難袋、どれくらい夢かわプリンセス級に完璧かな？✨</p>
+      <div class="text-box">
+        <h1>避難袋チェックシート</h1>
+        <p style="text-align:center;">災害に備えて、今の準備状況を確認してみましょう</p>
+      </div>
       <div style="text-align:center;">
-        <button class="nav-btn" onclick="startQuiz()">診断スタート💖▶</button>
+        <button class="nav-btn" onclick="start()">チェック開始</button>
       </div>
     `;
-  } else if(page==="quiz"){
-    const q=QUESTIONS[i];
+  }
+
+  if(page==="quiz"){
+    const q = QUESTIONS[index];
     app.innerHTML=`
-      <h2>質問 ${i+1} / ${QUESTIONS.length}</h2>
-      <div class="question-card">${q.text}</div>
-      <div class="btn-row">
-        <button class="yes-btn" onclick="choose(true)">はい💖</button>
-        <button class="no-btn" onclick="choose(false)">いいえ💔</button>
+      <div class="text-box">
+        <h2>質問 ${index+1} / ${QUESTIONS.length}</h2>
       </div>
+
+      <div class="question-card">
+        ${q.text}
+        <p style="font-size:0.85rem;color:#666;">${q.desc}</p>
+      </div>
+
       <div class="btn-row">
-        <button class="nav-btn" onclick="prev()" ${i===0?"disabled":""}>前へ</button>
-        <button class="nav-btn" onclick="goHome()">トップへ戻る</button>
+        <button class="yes-btn" onclick="answer(true)">準備できている</button>
+        <button class="no-btn" onclick="answer(false)">これから準備</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="nav-btn" onclick="prev()" ${index===0?"disabled":""}>前へ</button>
+        <button class="nav-btn" onclick="home()">トップ</button>
       </div>
     `;
-  } else if(page==="result"){
-    const base=mustScore;
-    const bonus=Math.min(bonusScore,20);
-    const total=Math.min(base+bonus,120);
-    const onceList=wrongList.filter(q=>q.category==="once");
-    const twiceList=wrongList.filter(q=>q.category==="twice");
-    const stockList=wrongList.filter(q=>q.category==="stock");
-    function renderList(list){ 
-      if(list.length===0) return "<p class='correct'>完璧です！✨💖</p>";
-      return list.map(q=>`<div class="question-card wrong">✖ ${q.text}<p>${q.desc}</p></div>`).join("");
-    }
+  }
+
+  if(page==="result"){
+    const missing = QUESTIONS.filter(q => !answers[q.id]);
+    const yesCount = QUESTIONS.length - missing.length;
+    const score = Math.round(yesCount / QUESTIONS.length * 100);
+
     app.innerHTML=`
-      <h1>診断結果🌈💖</h1>
-      <h2>避難袋の充実度：${total.toFixed(1)}%</h2>
-      <p>必須アイテム：${base}%</p>
-      <p>追加アイテム：+${bonus.toFixed(1)}%</p>
+      <div class="text-box">
+        <h1>チェック結果</h1>
+        <h2>${score}% 準備できています</h2>
+      </div>
 
-      <div class="result-category">一次持ち出し袋</div>
-      ${renderList(onceList)}
+      <div class="question-card">
+        <strong>次にやってみよう</strong>
+        <p>
+          ・足りなかったものを1つ調べてみよう<br>
+          ・家族と避難場所を話し合ってみよう
+        </p>
+      </div>
 
-      <div class="result-category">二次持ち出し袋</div>
-      ${renderList(twiceList)}
-
-      <div class="result-category">自宅ストック</div>
-      ${renderList(stockList)}
+      <div class="text-box">
+        <h3>不足アイテム</h3>
+        ${missing.length === 0 ? "<p>完璧！全て準備済み✨</p>" :
+          missing.map(q=>`
+            <div class="question-card">
+              ${q.text}<br>
+              <small>${q.desc}</small>
+              ${q.url ? `<p style="text-align:center;">
+                <a href="${q.url}" target="_blank" style="display:inline-block;padding:6px 12px;border-radius:999px;background:#4fc3f7;color:white;text-decoration:none;">準備しておこう！</a>
+              </p>` : ""}
+            </div>
+          `).join("")
+        }
+      </div>
 
       <div style="text-align:center; margin-top:20px;">
-        <button class="nav-btn" onclick="goHome()">もう一度診断💖</button>
+        <button class="nav-btn" onclick="home()">もう一度チェック</button>
       </div>
     `;
   }
 }
 
-/* =======================================
-   イベント関数
-======================================= */
-function startQuiz(){ page="quiz"; i=0; mustScore=0; bonusScore=0; wrongList=[]; render(); }
-function choose(answer){
-  const q=QUESTIONS[i];
-  if(answer){ if(q.type==="must") mustScore+=10; else if(q.type==="bonus") bonusScore+=3.3; }
-  else{ wrongList.push(q); }
-  if(i===QUESTIONS.length-1) page="result"; else i++;
-  render();
-}
-function prev(){ if(i>0) i--; render(); }
-function goHome(){ page="home"; render(); }
+/* ===============================
+   操作
+=============================== */
+function start(){ page="quiz"; index=0; answers={}; render(); }
+function answer(a){ answers[QUESTIONS[index].id]=a; index < QUESTIONS.length-1 ? index++ : page="result"; render(); }
+function prev(){ if(index>0) index--; render(); }
+function home(){ page="home"; render(); }
 
-/* 初期表示 */
 render();
 </script>
 </body>
 </html>
-
